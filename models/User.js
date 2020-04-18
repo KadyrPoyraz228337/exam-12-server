@@ -10,6 +10,10 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  displayName: {
+    type: String,
+    required: true
+  },
   token: String,
   facebookId: String,
   avatarImage: String
