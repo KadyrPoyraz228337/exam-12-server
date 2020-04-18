@@ -14,6 +14,7 @@ module.exports = class UserService {
         const user = await User.findOne({_id: id});
 
         resolve({
+          _id: user._id,
           username: user.username,
           displayName: user.displayName,
           avatarImage: user.avatarImage,
@@ -44,7 +45,7 @@ module.exports = class UserService {
 
           resolve({
             user: {
-              id: user._id,
+              _id: user._id,
               username: user.username,
               displayName: user.displayName,
               avatarImage: user.avatarImage,
@@ -101,7 +102,7 @@ module.exports = class UserService {
 
         resolve({
           user: {
-            id: user._id,
+            _id: user._id,
             username: user.username,
             displayName: user.displayName,
             avatarImage: user.avatarImage,
