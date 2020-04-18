@@ -4,8 +4,25 @@ const
   crypto = require('crypto'),
   {nanoid} = require('nanoid');
 
-module.exports = class AuthService {
+module.exports = class UserService {
   constructor() {
+  }
+
+  async getUserInfo(id) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const user = await User.findOne({_id: id});
+
+        resolve({
+          username: user.username,
+          displayName: user.displayName,
+          avatarImage: user.avatarImage,
+          facebookId: user.facebookId || null
+        })
+      } catch (e) {
+        reject(e)
+      }
+    })
   }
 
   async login(username, password) {
@@ -13,11 +30,11 @@ module.exports = class AuthService {
       try {
         const user = await User.findOne({username: username});
         if (!user) {
-          return  reject('Username or password not correct!');
+          return reject('Username or password not correct!');
         } else {
           const correctPassword = await argon2.verify(user.password, password);
           if (!correctPassword) {
-            return  reject('Username or password not correct!');
+            return reject('Username or password not correct!');
           }
 
           const token = this.createToken();
@@ -27,6 +44,7 @@ module.exports = class AuthService {
 
           resolve({
             user: {
+              id: user._id,
               username: user.username,
               displayName: user.displayName,
               avatarImage: user.avatarImage,
@@ -83,6 +101,7 @@ module.exports = class AuthService {
 
         resolve({
           user: {
+            id: user._id,
             username: user.username,
             displayName: user.displayName,
             avatarImage: user.avatarImage,
@@ -97,63 +116,6 @@ module.exports = class AuthService {
         reject(e)
       }
     }))
-  }
-
-  async editUser(user, username, displayName, password, avatarImage) {
-    return new Promise(async (resolve, reject) => {
-      try {
-
-        if (username) {
-          const editableUser = await User.findOne({username});
-
-          if (editableUser) {
-            return reject({message: 'A user with the same username already exists'})
-          }
-
-          if (user.facebookId && !user.changed) {
-            await User.updateOne({_id: user._id}, {username, changed: true})
-          } else if (user.facebookId && user.changed) {
-            return reject({message: 'the facebook user can only change the username once'});
-          } else {
-            await User.updateOne({_id: user._id}, {username})
-          }
-        }
-
-        if (displayName) await User.updateOne({_id: user._id}, {displayName});
-
-        if (password) {
-          if (user.facebookId) {
-            reject({message: 'password change not available'});
-          }
-
-          const salt = crypto.randomBytes(32);
-          password = await argon2.hash(password, {salt});
-
-          await User.updateOne({_id: user._id}, {password})
-        }
-
-        if (avatarImage !== 'null') await User.updateOne({_id: user._id}, {avatarImage});
-
-        const editedUser = await User.findOne({_id: user._id});
-
-        let data = {
-          username: editedUser.username,
-          displayName: editedUser.displayName,
-          avatarImage: editedUser.avatarImage,
-          role: editedUser.role,
-          token: editedUser.token
-        };
-
-        if (user.facebookId) {
-          data.facebookId = editedUser.facebookId;
-          data.changed = editedUser.changed
-        }
-
-        resolve(data)
-      } catch (e) {
-        reject(e)
-      }
-    })
   }
 
   createToken() {
