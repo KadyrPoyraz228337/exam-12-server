@@ -10,27 +10,9 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  role: {
-    type: String,
-    default: 'user',
-    enum: ['user','admin']
-  },
-  displayName: {
-    type: String,
-    required: true
-  },
   token: String,
   facebookId: String,
-  avatarImage: String,
-  changed: {
-    type: Boolean,
-    default: false
-  },
-  subscriptions: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'User',
-    default: []
-  }
+  avatarImage: String
 });
 
 module.exports = mongoose.model('User', UserSchema);
