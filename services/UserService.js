@@ -31,11 +31,11 @@ module.exports = class UserService {
       try {
         const user = await User.findOne({username: username});
         if (!user) {
-          return reject('Username or password not correct!');
+          return reject({message: 'Username or password not correct!'});
         } else {
           const correctPassword = await argon2.verify(user.password, password);
           if (!correctPassword) {
-            return reject('Username or password not correct!');
+            return reject({message: 'Username or password not correct!'});
           }
 
           const token = this.createToken();
