@@ -5,7 +5,6 @@ const
   {nanoid} = require('nanoid'),
   axios = require("axios"),
   AuthUser = require('../services/user'),
-  isAuth= require('../middlewares/isAuth'),
   User = require('../models/User'),
   config = require('../config'),
   router = express.Router();
@@ -60,70 +59,6 @@ router.post('/sessions', async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).send(error);
-  }
-});
-
-router.put('/edit', isAuth, upload.single('avatar'), async (req, res) => {
-  try {
-    let
-      user = req.currentUser,
-      username = req.body.username,
-      password = req.body.password,
-      displayName = req.body.displayName,
-      avatarImage = req.body.avatarImage;
-
-    if (req.file) avatarImage = req.file.filename;
-
-    const service = new AuthUser();
-    const editableUser = await service.editUser(user, username, displayName, password, avatarImage);
-
-    res.send({...editableUser});
-
-  } catch (e) {
-    console.log(e);
-    return res.status(500).send(e);
-  }
-});
-
-router.get('/subscriptions', isAuth, async (req, res) => {
-  try {
-    const subscriptions = await User.findOne({_id: req.currentUser._id}).populate('subscriptions', [
-      'displayName', 'avatarImage', 'facebookId', 'username'
-    ]);
-
-    res.send(subscriptions.subscriptions);
-  } catch (e) {
-    res.status(500).send(e);
-  }
-});
-
-router.post('/subscribe', isAuth, async (req, res) => {
-  try {
-    const
-      subscriber = req.currentUser,
-      user = req.body.user;
-
-    const service = new AuthUser();
-    const subscriptionPurpose = await service.subscribe(user, subscriber);
-
-    res.send(subscriptionPurpose)
-  } catch (e) {
-    res.status(500).send(e);
-  }
-});
-
-router.post('/unsubscribe', isAuth, async (req, res) => {
-  try {
-    const
-      subscriber = req.currentUser,
-      user = req.body.user;
-
-    const service = new AuthUser();
-    const unsubscribeUser = await service.unsubscribe(user, subscriber);
-
-    res.send(unsubscribeUser)
-  } catch (e) {
-    res.status(500).send(e);
   }
 });
 

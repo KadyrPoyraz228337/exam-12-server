@@ -10,7 +10,7 @@ module.exports = {
     appSecret: '10903dccd8573ac996f315ea1ed29084'
   },
   mongooseDb: {
-    link: 'mongodb://localhost:27017/app',
+    link: 'mongodb://localhost:27017/gallery',
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
