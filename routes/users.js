@@ -4,7 +4,7 @@ const
   multer = require('multer'),
   {nanoid} = require('nanoid'),
   axios = require("axios"),
-  AuthUser = require('../services/user'),
+  UserService = require('../services/UserService'),
   User = require('../models/User'),
   config = require('../config'),
   router = express.Router();
@@ -24,7 +24,7 @@ const upload = multer({storage});
   try {
     if (req.file) avatarImage = req.file.filename;
 
-    const service = new AuthUser;
+    const service = new UserService();
     const {user, token} = await service.singUp(name, displayName, password, avatarImage);
 
     return res.send({...user, token})
@@ -38,7 +38,7 @@ router.delete('/sessions', async (req, res) => {
   try {
     const token = req.get('Authorization').split(' ')[1];
 
-    const service = new AuthUser();
+    const service = new UserService();
     const success = await service.logout(token);
 
     res.send(success);
@@ -48,16 +48,16 @@ router.delete('/sessions', async (req, res) => {
 });
 
 router.post('/sessions', async (req, res) => {
-  const
-    password = req.body.password,
-    username = req.body.username;
   try {
-    const service = new AuthUser();
+    const
+      password = req.body.password,
+      username = req.body.username;
+
+    const service = new UserService();
     const {user, token} = await service.login(username, password);
 
     return res.send({...user, token});
   } catch (error) {
-    console.log(error);
     return res.status(500).send(error);
   }
 });
@@ -89,8 +89,7 @@ router.post('/facebook', async (req, res) => {
         password: nanoid(),
         avatarImage: req.body.picture.data.url,
         facebookId: req.body.id,
-        token: nanoid(),
-        changed: false
+        token: nanoid()
       })
     } else {
       await User.update({username: req.body.id}, {
@@ -102,7 +101,6 @@ router.post('/facebook', async (req, res) => {
 
     res.send(updatedUser);
   } catch (e) {
-    console.log(e);
     res.status(500).send(e);
   }
 });
